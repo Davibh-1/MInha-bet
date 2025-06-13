@@ -8,89 +8,114 @@
 body {
     font-family: Arial,sans-serif;
     margin: 0;
-    padding: 10px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     background: linear-gradient(to bottom, #ffffff, #000000);
     color: #fff;
 }
 
 .container {
     text-align: center;
-    background-color: #fff;
+    background: #fff;
     color: #000;
     padding: 20px;
-    border-radius: 8px;
     margin-bottom: 20px;
+    border-radius: 8px;
     box-shadow: 0 5px 15px -5px black;
+    width: 90%;
+    max-width: 400px;
 }
 
 button {
-    padding: 15px 20px;
+    padding: 10px 20px;
     font-size: 18px;
     margin-bottom: 10px;
+    cursor: pointer;
     border: 2px solid #ccc;
     border-radius: 5px;
-    transition: background-color 0.3s;
+    transition: background 0.3s, transform 0.5s ease;
     width: 100%;
-    box-sizing: border-box;
-    cursor: pointer;
+    box-shadow: 0 5px 15px -5px black;
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px -10px black;
 }
 
 input {
-    padding: 15px 20px;
-    font-size: 18px;
+    padding: 10px;
     margin-bottom: 10px;
+    font-size: 18px;
     width: 100%;
     box-sizing: border-box;
-    border: 2px solid #ccc;
     border-radius: 5px;
+    border: 2px solid #ccc;
 }
 
 .contador, .saldo {
-    position: fixed;
-    top: 10px;
+    margin-bottom: 10px;
     padding: 10px;
+    color: #ffffff;
+    background:rgba(0, 0, 0, 0.7);
     border-radius: 5px;
     font-size: 18px;
-    color: #fff;
-    background:rgba(0, 0, 0, 0.7);
     border: 5px solid transparent;
     border-image: linear-gradient(0deg, #ff007f, #ffcc00, #00ffcc, #ff0000, #ff007f) 1;
     animation: girarBorda 5s linear infinite;
     transition: transform 0.5s ease, box-shadow 0.5s ease;
-    z-index: 100;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
 }
 
-.saldo { left: 10px; }
-.contador { right: 10px; }
-.saldo:hover, .contador:hover {
+.contador:hover, .saldo:hover {
     transform: scale(1.05);
     box-shadow: 0 10px 20px -10px black;
 }
 
 .extrato {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    width: 90%;
-    max-height: 200px;
-    overflow-y: auto;
-    background:rgba(0, 0, 0, 0.7);
-    color: #fff;
+    margin-bottom: 20px;
     padding: 10px;
+    color: #ffffff;
+    background:rgba(0, 0, 0, 0.7);
     border-radius: 5px;
     font-size: 14px;
-    border: none;
+    width: 90%;
+    max-width: 400px;
+    max-height: 200px;
+    overflow-y: scroll;
     box-shadow: 0 0 10px black;
-    z-index: 100;
+}
+
+.lucro {
+    margin-bottom: 20px;
+    padding: 10px;
+    color: #ffffff;
+    background:rgba(0, 128, 0, 0.7);
+    border-radius: 5px;
+    font-size: 18px;
+    display: none;
+    animation: animarLucro 1s ease-out;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+}
+
+@keyframes animarLucro {
+    0% { transform: scale(0.8);opacity: 0 }
+    100% { transform: scale(1);opacity: 1 }
 }
 
 .square {
-    width: 80px;
-    height: 80px;
-    margin: 0 5px;
+    width: 100px;
+    height: 100px;
+    margin: 0 10px;
     border: 5px solid #000;
     border-radius: 20px;
-    transition: background-color 0.5s ease, transform 0.5s ease;
+    transition: background 0.5s ease, transform 0.5s ease;
     box-shadow: 0 5px 15px -5px black;
     cursor: pointer;
 }
@@ -108,40 +133,47 @@ input {
     100% { border-image: linear-gradient(360deg, #ff007f, #ffcc00, #00ffcc, #ff0000, #ff007f) 1 }
 }
 
+.chances {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.chances .square {
+    margin: 0 5px;
+}
 </style>
 </head>
 <body>
 
 <h2>Jogo das Cores</h2>
-<div style="display: flex; justify-content: center; margin-bottom: 10px">
+
+<div class="chances">
     <div class="square" id="square1"></div>
     <div class="square" id="square2"></div>
     <div class="square" id="square3"></div>
 </div>
+
 <button id="parar">Parar um</button>
 
 <div class="container">
     <h1>Aposte</h1>
-    <div>
-        <label for="contador-input">Valor da aposta:</label>
-        <input type="number" id="contador-input" min="1" value="100">
-        <button id="botao">Apostar</button>
-    </div>
-    <div>
-        <label for="deposito-input">Depósito:</label>
-        <input type="number" id="deposito-input" min="1">
-        <button id="depositar">Depositar</button>
-    </div>
-    <div>
-        <label for="saque-input">Saque:</label>
-        <input type="number" id="saque-input" min="1">
-        <button id="sacar">Sacar</button>
-    </div>
+    <label for="contador-input">Valor da aposta:</label>
+    <input type="number" id="contador-input" min="1" value="100">
+    <button id="botao">Apostar</button>
+
+    <label for="deposito-input">Depósito:</label>
+    <input type="number" id="deposito-input" min="1">
+    <button id="depositar">Depositar</button>
+
+    <label for="saque-input">Saque:</label>
+    <input type="number" id="saque-input" min="1">
+    <button id="sacar">Sacar</button>
 </div>
 
 <div id="contador" class="contador">Valor Apostado: 100</div>
 <div id="saldo" class="saldo">Saldo Total: 100</div>
-<div id="lucro" style="display: none;" class="lucro"></div>
+<div id="lucro" class="lucro">Lucro: R$ 0,00</div>
 <div class="extrato" id="extrato">
     <h3>Extrato</h3>
     <ul id="lista-extrato"></ul>
@@ -152,12 +184,13 @@ input {
     let valorApostado = 100;
     let extrato = [];
 
+    let apostando = false;
+
     const squares = [document.getElementById("square1"), document.getElementById("square2"), document.getElementById("square3")];
     const colors = ["white", "blue", "gold"];
 
     let intervals = [];
 
-    let apostando = false;
     let stopCount = 0;
 
     function atualizarUI() {
@@ -169,18 +202,26 @@ input {
 
     function atualizarExtrato() {
         const lista = document.getElementById("lista-extrato");
+
         lista.innerHTML = "";
-        extrato.slice(-10).reverse().forEach(item => {
+
+        extrato.forEach(item => {
             const li = document.createElement("li");
+
             li.innerText = item;
+
             lista.appendChild(li);
         });
+
     }
 
     function mostrarLucro(valor) {
         const lucro = document.getElementById("lucro");
+
         lucro.innerText = `Lucro: R$ ${valor.toFixed(2)}`;
+
         lucro.style.display = "block";
+
         setTimeout(() => {
             lucro.style.display = "none";
         }, 3000);
@@ -189,7 +230,7 @@ input {
     document.getElementById("botao").addEventListener("click", () => {
         const input = parseInt(document.getElementById("contador-input").value);
         if (isNaN(input) || input <= 0) {
-            alert("Valor da aposta inválido.");
+            alert("Digite um valor válido para aposta.");
             return;
         }
         if (input > saldoTotal) {
@@ -237,6 +278,7 @@ input {
         const cor1 = squares[0].style.backgroundColor;
         const cor2 = squares[1].style.backgroundColor;
         const cor3 = squares[2].style.backgroundColor;
+
         let ganho = 0;
         let multiplicador = 0;
 
@@ -269,6 +311,7 @@ input {
             extrato.push(`Depósito: R$ ${valor.toFixed(2)}`);
             atualizarUI();
             atualizarExtrato();
+
         } else {
             alert("Valor inválido.");
         }
@@ -281,7 +324,9 @@ input {
             extrato.push(`Saque: R$ ${valor.toFixed(2)}`);
             atualizarUI();
             atualizarExtrato();
+
             alert(`Você sacou R$ ${valor.toFixed(2)}`);
+
         } else {
             alert("Valor inválido ou saldo insuficiente.");
         }
