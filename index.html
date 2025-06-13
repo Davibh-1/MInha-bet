@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jogo das Cores</title>
+<style>
+body {
+    font-family: Arial,sans-serif;
+    margin: 0;
+    padding: 10px;
+    background: linear-gradient(to bottom, #ffffff, #000000);
+    color: #fff;
+}
+
+.container {
+    text-align: center;
+    background-color: #fff;
+    color: #000;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px -5px black;
+}
+
+button {
+    padding: 15px 20px;
+    font-size: 18px;
+    margin-bottom: 10px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+input {
+    padding: 15px 20px;
+    font-size: 18px;
+    margin-bottom: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+}
+
+.contador, .saldo {
+    position: fixed;
+    top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 18px;
+    color: #fff;
+    background:rgba(0, 0, 0, 0.7);
+    border: 5px solid transparent;
+    border-image: linear-gradient(0deg, #ff007f, #ffcc00, #00ffcc, #ff0000, #ff007f) 1;
+    animation: girarBorda 5s linear infinite;
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
+    z-index: 100;
+}
+
+.saldo { left: 10px; }
+.contador { right: 10px; }
+.saldo:hover, .contador:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px -10px black;
+}
+
+.extrato {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 90%;
+    max-height: 200px;
+    overflow-y: auto;
+    background:rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    border: none;
+    box-shadow: 0 0 10px black;
+    z-index: 100;
+}
+
+.square {
+    width: 80px;
+    height: 80px;
+    margin: 0 5px;
+    border: 5px solid #000;
+    border-radius: 20px;
+    transition: background-color 0.5s ease, transform 0.5s ease;
+    box-shadow: 0 5px 15px -5px black;
+    cursor: pointer;
+}
+
+.square:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px -10px black;
+}
+
+@keyframes girarBorda {
+    0% { border-image: linear-gradient(0deg, #ff007f, #ffcc00, #00ffcc, #ff0000, #ff007f) 1 }
+    25% { border-image: linear-gradient(90deg, #ff007f, #ffcc00, #00ffcc, #ff0000, #ff007f) 1 }
+    50% { border-image: linear-gradient(180deg, #ff007f, #ffcc00, #00ffcc, #ff0000, #ff007f) 1 }
+    75% { border-image: linear-gradient(270deg, #ff007f, #ffcc00, #00ffcc, #ff0000, #ff007f) 1 }
+    100% { border-image: linear-gradient(360deg, #ff007f, #ffcc00, #00ffcc, #ff0000, #ff007f) 1 }
+}
+
+</style>
+</head>
+<body>
+
+<h2>Jogo das Cores</h2>
+<div style="display: flex; justify-content: center; margin-bottom: 10px">
+    <div class="square" id="square1"></div>
+    <div class="square" id="square2"></div>
+    <div class="square" id="square3"></div>
+</div>
+<button id="parar">Parar um</button>
+
+<div class="container">
+    <h1>Aposte</h1>
+    <div>
+        <label for="contador-input">Valor da aposta:</label>
+        <input type="number" id="contador-input" min="1" value="100">
+        <button id="botao">Apostar</button>
+    </div>
+    <div>
+        <label for="deposito-input">Depósito:</label>
+        <input type="number" id="deposito-input" min="1">
+        <button id="depositar">Depositar</button>
+    </div>
+    <div>
+        <label for="saque-input">Saque:</label>
+        <input type="number" id="saque-input" min="1">
+        <button id="sacar">Sacar</button>
+    </div>
+</div>
+
+<div id="contador" class="contador">Valor Apostado: 100</div>
+<div id="saldo" class="saldo">Saldo Total: 100</div>
+<div id="lucro" style="display: none;" class="lucro"></div>
+<div class="extrato" id="extrato">
+    <h3>Extrato</h3>
+    <ul id="lista-extrato"></ul>
+</div>
+
+<script>
+    let saldoTotal = 100;
+    let valorApostado = 100;
+    let extrato = [];
+
+    const squares = [document.getElementById("square1"), document.getElementById("square2"), document.getElementById("square3")];
+    const colors = ["white", "blue", "gold"];
+
+    let intervals = [];
+
+    let apostando = false;
+    let stopCount = 0;
+
+    function atualizarUI() {
+        document.getElementById("contador").innerText = `Valor Apostado: ${valorApostado}`;
+
+        document.getElementById("saldo").innerText = `Saldo Total: ${saldoTotal}`;
+
+    }
+
+    function atualizarExtrato() {
+        const lista = document.getElementById("lista-extrato");
+        lista.innerHTML = "";
+        extrato.slice(-10).reverse().forEach(item => {
+            const li = document.createElement("li");
+            li.innerText = item;
+            lista.appendChild(li);
+        });
+    }
+
+    function mostrarLucro(valor) {
+        const lucro = document.getElementById("lucro");
+        lucro.innerText = `Lucro: R$ ${valor.toFixed(2)}`;
+        lucro.style.display = "block";
+        setTimeout(() => {
+            lucro.style.display = "none";
+        }, 3000);
+    }
+
+    document.getElementById("botao").addEventListener("click", () => {
+        const input = parseInt(document.getElementById("contador-input").value);
+        if (isNaN(input) || input <= 0) {
+            alert("Valor da aposta inválido.");
+            return;
+        }
+        if (input > saldoTotal) {
+            alert("Aposta maior que o saldo.");
+            return;
+        }
+        valorApostado = input;
+        saldoTotal -= valorApostado;
+        apostando = true;
+        atualizarUI();
+        resetarSquares();
+        iniciarSquares();
+    });
+
+    document.getElementById("parar").addEventListener("click", () => {
+        if (!apostando) {
+            alert("Aposte antes de jogar.");
+            return;
+        }
+        if (stopCount < 3) {
+            clearInterval(intervals[stopCount]);
+            stopCount++;
+            if (stopCount === 3) {
+                verificaResultado();
+            }
+        }
+    });
+
+    function iniciarSquares() {
+        stopCount = 0;
+        for (let i = 0; i < squares.length; i++) {
+            intervals[i] = setInterval(() => {
+                squares[i].style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+            }, 300);
+        }
+    }
+
+    function resetarSquares() {
+        squares.forEach(sq => sq.style.backgroundColor = "white");
+
+    }
+
+    function verificaResultado() {
+        const cor1 = squares[0].style.backgroundColor;
+        const cor2 = squares[1].style.backgroundColor;
+        const cor3 = squares[2].style.backgroundColor;
+        let ganho = 0;
+        let multiplicador = 0;
+
+        if (cor1 === cor2 && cor2 === cor3) {
+            if (cor1 === "white") {
+                multiplicador = 2;
+            } else if (cor1 === "blue") {
+                multiplicador = 4;
+            } else if (cor1 === "gold") {
+                multiplicador = 8;
+            }
+            ganho = valorApostado * multiplicador;
+            saldoTotal += ganho;
+            mostrarLucro(ganho);
+            extrato.push(`Ganhou: R$ ${ganho.toFixed(2)} (${cor1} x${multiplicador})`);
+
+        } else {
+            extrato.push(`Perdeu: R$ ${valorApostado.toFixed(2)}`);
+
+        }
+        atualizarUI();
+        atualizarExtrato();
+        apostando = false;
+    }
+
+    document.getElementById("depositar").addEventListener("click", () => {
+        const valor = parseInt(document.getElementById("deposito-input").value);
+        if (valor > 0) {
+            saldoTotal += valor;
+            extrato.push(`Depósito: R$ ${valor.toFixed(2)}`);
+            atualizarUI();
+            atualizarExtrato();
+        } else {
+            alert("Valor inválido.");
+        }
+    });
+
+    document.getElementById("sacar").addEventListener("click", () => {
+        const valor = parseInt(document.getElementById("saque-input").value);
+        if (valor > 0 && valor <= saldoTotal) {
+            saldoTotal -= valor;
+            extrato.push(`Saque: R$ ${valor.toFixed(2)}`);
+            atualizarUI();
+            atualizarExtrato();
+            alert(`Você sacou R$ ${valor.toFixed(2)}`);
+        } else {
+            alert("Valor inválido ou saldo insuficiente.");
+        }
+    });
+
+    atualizarUI();
+
+</script>
+
+</body>
+</html>
